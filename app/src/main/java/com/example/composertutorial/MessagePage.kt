@@ -1,5 +1,6 @@
 package com.example.composertutorial
 
+import android.app.Application
 import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -22,17 +23,23 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.rememberAsyncImagePainter
+import com.example.composertutorial.data.User
+import com.example.composertutorial.data.UserViewModel
+import com.example.composertutorial.data.UserViewModelFactory
 import com.example.composertutorial.ui.theme.ComposerTutorialTheme
-
+import java.io.File
 
 
 @Composable
@@ -51,18 +58,34 @@ fun Conversation(onNavigateBack: () -> Unit, messages: List<Message>) {
     }
 }
 
+
 data class Message(val author: String, val body: String)
 
 @Composable
 fun MessageCard(msg: Message) {
     Row(modifier = Modifier.padding(all = 8.dp)) {
+        val context = LocalContext.current
+        var profilePhoto = File(context.filesDir, "profile_picture.jpg")
+        val painter = rememberAsyncImagePainter(profilePhoto)
+
+        //if the profile_picture.jpg doesn't exist, the cat will be the photo
+        if (!profilePhoto.exists()) {
+            profilePhoto = File(context.filesDir, "kissa.jpg")
+        }
+        var updateProfile by remember { mutableStateOf(false) }
+
+        val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(context.applicationContext as Application))
+        userViewModel.insertUser(User(1, "User"))
+        val user by userViewModel.userData.collectAsState(initial = null)
+
         Image(
-            painter = painterResource(R.drawable.profile_picture),
+            painter = painter,
             contentDescription = null,
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
                 .border(1.5.dp, MaterialTheme.colorScheme.secondary, CircleShape)
+                .clickable {updateProfile = !updateProfile}
         )
         Spacer(modifier = Modifier.width(8.dp))
 

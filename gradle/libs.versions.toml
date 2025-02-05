@@ -1,5 +1,6 @@
 [versions]
 agp = "8.8.0"
+coilCompose = "3.0.4"
 kotlin = "2.0.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -15,6 +16,7 @@ navigationDynamicFeaturesFragment = "2.8.5"
 navigationFragment = "2.8.5"
 navigationTesting = "2.8.5"
 navigationUi = "2.8.5"
+roomVersion = "2.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -23,6 +25,15 @@ androidx-navigation-dynamic-features-fragment = { module = "androidx.navigation:
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationFragment" }
 androidx-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "navigationTesting" }
 androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationUi" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomVersion" }
+androidx-room-guava = { module = "androidx.room:room-guava", version.ref = "roomVersion" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomVersion" }
+androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomVersion" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomVersion" }
+androidx-room-rxjava2 = { module = "androidx.room:room-rxjava2", version.ref = "roomVersion" }
+androidx-room-rxjava3 = { module = "androidx.room:room-rxjava3", version.ref = "roomVersion" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "roomVersion" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
