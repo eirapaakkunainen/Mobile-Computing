@@ -1,7 +1,6 @@
 package com.example.composertutorial.data
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -25,7 +24,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             userDao.update(user)
         }
-
     }
 }
 

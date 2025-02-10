@@ -15,9 +15,8 @@ import com.example.composertutorial.ui.theme.ComposerTutorialTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,17 +41,12 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
     val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(context.applicationContext as Application))
     val user by userViewModel.userData.collectAsState(initial = null)
 
-    //var userName by remember(user?.userName) { mutableStateOf(user?.userName ?: "Username") }
-    var userName by remember { mutableStateOf(user?.userName ?: "Username") }
-    //var userName by remember { mutableStateOf("Username") }
-
-    LaunchedEffect(user) {
-        user?.let { userName = it.userName }
-    }
+    var userName by remember(user) { mutableStateOf(user?.userName ?: "") }
 
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var updateImage by remember { mutableStateOf(false) }
     val imageFile = File(context.filesDir, "profile_picture.jpg")
+
     if (imageFile.exists()) {
         imageUri = Uri.fromFile(imageFile)
     }
@@ -113,31 +107,24 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
         }
 
         //Text box to input username
-        BasicTextField(
+        OutlinedTextField(
             value = userName,
-            onValueChange = {
-                userName = it},
+            onValueChange = { newUsername ->
+                userName = newUsername
+                if (user != null){
+                    if (user!!.userName != newUsername) {
+                        userViewModel.updateUser(user!!.copy(userName = newUsername))
+                    }
+                }else {
+                    val newUser = User(userName = newUsername)
+                    userViewModel.insertUser(newUser)
+                }
+
+                },
+            label = {Text("Username")},
+            singleLine = true,
             modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp)
         )
-        //Button to set the username
-        Button(
-            onClick = {
-                //val updatedUser = User(user?.id ?: 0, userName)
-                //userViewModel.updateUser(updatedUser)
-
-                val updatedUser = if (user != null) {
-                    User(user!!.id, userName)
-                } else {
-                    User(0, userName)
-                }
-                userViewModel.updateUser(updatedUser)
-            },
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 16.dp)
-        ) {
-            Text("Set username")
-        }
 
         //Button to Messages
         Button(
@@ -153,6 +140,8 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
 @Composable
 fun PreviewFrontPge() {
     ComposerTutorialTheme {
-        FrontPage(onNavigateToMessages = {})
+        FrontPage(
+            onNavigateToMessages = {},
+        )
     }
 }

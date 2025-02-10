@@ -35,7 +35,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.rememberAsyncImagePainter
-import com.example.composertutorial.data.User
 import com.example.composertutorial.data.UserViewModel
 import com.example.composertutorial.data.UserViewModelFactory
 import com.example.composertutorial.ui.theme.ComposerTutorialTheme
@@ -58,7 +57,6 @@ fun Conversation(onNavigateBack: () -> Unit, messages: List<Message>) {
     }
 }
 
-
 data class Message(val author: String, val body: String)
 
 @Composable
@@ -75,7 +73,6 @@ fun MessageCard(msg: Message) {
         var updateProfile by remember { mutableStateOf(false) }
 
         val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(context.applicationContext as Application))
-        userViewModel.insertUser(User(1, "User"))
         val user by userViewModel.userData.collectAsState(initial = null)
 
         Image(
@@ -89,10 +86,7 @@ fun MessageCard(msg: Message) {
         )
         Spacer(modifier = Modifier.width(8.dp))
 
-        // We keep track if the message is expanded or not in this
-        // variable
         var isExpanded by remember { mutableStateOf(false) }
-        // surfaceColor will be updated gradually from one color to the other
         val surfaceColor by animateColorAsState(
             if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
         )
@@ -100,7 +94,7 @@ fun MessageCard(msg: Message) {
         // We toggle the isExpanded variable when we click on this Column
         Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
             Text(
-                text = msg.author,
+                text = user?.userName ?: "",
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.titleSmall
             )
@@ -110,16 +104,12 @@ fun MessageCard(msg: Message) {
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 shadowElevation = 1.dp,
-                // surfaceColor color will be changing gradually from primary to surface
                 color = surfaceColor,
-                // animateContentSize will change the Surface size gradually
                 modifier = Modifier.animateContentSize().padding(1.dp)
             ) {
                 Text(
                     text = msg.body,
                     modifier = Modifier.padding(all = 4.dp),
-                    // If the message is expanded, we display all its content
-                    // otherwise we only display the first line
                     maxLines = if (isExpanded) Int.MAX_VALUE else 1,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -140,7 +130,7 @@ fun PreviewMessageCard() {
     ComposerTutorialTheme {
         Surface {
             MessageCard(
-                msg = Message("Lexi", "Hey, take a look at Jetpack Compose, it's great!")
+                msg = Message("Lexi", "Hey, take a look at Jetpack Compose, it's great!"),
             )
         }
     }
@@ -157,7 +147,6 @@ fun PreviewConversation() {
 }
 
 object SampleData {
-    // Sample conversation data
     val conversationSample = listOf(
         Message(
             "Lexi",
