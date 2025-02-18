@@ -184,10 +184,10 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                                 requestMultiplePermissionLauncher.launch(
                                     arrayOf (
-                                        android.Manifest.permission.POST_NOTIFICATIONS,
-                                        android.Manifest.permission.ACTIVITY_RECOGNITION,
-                                        android.Manifest.permission.BODY_SENSORS,
-                                        android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS
+                                        Manifest.permission.POST_NOTIFICATIONS,
+                                        Manifest.permission.ACTIVITY_RECOGNITION,
+                                        Manifest.permission.BODY_SENSORS,
+                                        Manifest.permission.HIGH_SAMPLING_RATE_SENSORS
                                     )
                                 )
                             }

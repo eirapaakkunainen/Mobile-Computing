@@ -54,7 +54,7 @@ class SensorService : Service(), SensorEventListener {
     private fun createForegroundNotification(): Notification {
         return NotificationCompat.Builder(this, "SENSOR_CHANNEL")
             .setContentTitle("Running Detection Active")
-            .setContentText("Detecting motion...")
+            .setContentText("Notifications enabled, detecting motion...")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
