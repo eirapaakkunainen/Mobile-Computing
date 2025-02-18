@@ -1,10 +1,14 @@
 package com.example.composertutorial
 
+import android.Manifest
 import android.app.Application
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.material3.Button
@@ -17,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +39,9 @@ import com.example.composertutorial.data.UserViewModel
 import com.example.composertutorial.data.UserViewModelFactory
 import java.io.File
 import java.io.FileOutputStream
+import androidx.compose.material3.AlertDialog
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun FrontPage(onNavigateToMessages: () -> Unit) {
     val context = LocalContext.current
@@ -51,6 +58,7 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
         imageUri = Uri.fromFile(imageFile)
     }
 
+    //photo picker
     val photoPicker = rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) {uri ->
         uri?.let {selectedUri ->
             val inputStream = context.contentResolver.openInputStream(selectedUri)
@@ -63,6 +71,27 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
             updateImage = !updateImage
         }
     }
+
+    //track dialog visibility
+    var showDialog by remember { mutableStateOf(false) }
+
+    // request permission launcher for notifications
+    val requestMultiplePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            val isGranted = permissions[Manifest.permission.FOREGROUND_SERVICE_HEALTH] == true &&
+                            permissions[Manifest.permission.ACTIVITY_RECOGNITION] == true &&
+                            permissions[Manifest.permission.BODY_SENSORS] == true &&
+                            permissions[Manifest.permission.HIGH_SAMPLING_RATE_SENSORS] == true
+
+            if (isGranted) {
+                val serviceIntent = Intent (context, SensorService::class.java)
+                context.startService(serviceIntent)
+            } else {
+
+            }
+        }
+    )
 
     Column (modifier = Modifier.padding(64.dp)) {
         Text(
@@ -111,20 +140,71 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
             value = userName,
             onValueChange = { newUsername ->
                 userName = newUsername
-                if (user != null){
+                user?.let {
+                    if (it.userName != newUsername) {
+                        userViewModel.updateUser(it.copy(userName = newUsername))
+                    }
+                } ?: run {
+                    val newUser = User(userName = newUsername)
+                    userViewModel.insertUser(newUser)
+                }
+
+                /*if (user != null){
                     if (user!!.userName != newUsername) {
                         userViewModel.updateUser(user!!.copy(userName = newUsername))
                     }
                 }else {
                     val newUser = User(userName = newUsername)
                     userViewModel.insertUser(newUser)
-                }
+                }*/
 
                 },
             label = {Text("Username")},
             singleLine = true,
             modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp)
         )
+
+        //Button to enable notifications
+        Button(
+            onClick = { showDialog = true },
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp)
+        ) {
+            Text("Enable notifications")
+        }
+
+        //if showDialog is true, this dialog shows in the screen
+        if (showDialog) {
+            AlertDialog (
+                onDismissRequest = { showDialog = false },
+                title = { Text("Are you sure you want to enable notifications?") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showDialog = false
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                requestMultiplePermissionLauncher.launch(
+                                    arrayOf (
+                                        android.Manifest.permission.POST_NOTIFICATIONS,
+                                        android.Manifest.permission.ACTIVITY_RECOGNITION,
+                                        android.Manifest.permission.BODY_SENSORS,
+                                        android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS
+                                    )
+                                )
+                            }
+                        }
+                    ) {
+                        Text("Confirm")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showDialog = false }
+                    ) {
+                        Text("Dismiss")
+                    }
+                }
+            )
+        }
 
         //Button to Messages
         Button(

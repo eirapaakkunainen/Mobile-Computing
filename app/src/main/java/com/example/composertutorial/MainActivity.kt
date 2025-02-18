@@ -1,5 +1,7 @@
 package com.example.composertutorial
 
+import android.content.Intent
+import android.os.Build
 import androidx.navigation.compose.composable
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,6 +18,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val serviceIntent = Intent(this, SensorService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
 
         setContent {
             ComposerTutorialTheme {
@@ -42,7 +51,9 @@ fun MyAppNavHost(navController: NavController) {
         composable("message_page") {
             Conversation(
                 onNavigateBack = {
-                    navController.popBackStack("front_page", false)
+                    if (navController.popBackStack("front_page", false)) {
+                        navController.navigate("front_page")
+                    }
                 },
                 messages = SampleData.conversationSample
             )
