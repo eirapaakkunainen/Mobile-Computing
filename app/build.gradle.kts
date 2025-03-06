@@ -2,9 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    // Kotlin serialization plugin for type safe routes and navigation arguments
     kotlin("plugin.serialization") version "2.0.21"
     id("com.google.devtools.ksp")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 android {
@@ -38,7 +42,11 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
-        compose = true
+        buildFeatures {
+            buildConfig = true
+        }
+        //compose = true
+        viewBinding = true
     }
 }
 
@@ -55,6 +63,11 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.media3.common.ktx)
+    implementation(libs.play.services.maps)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.androidx.foundation.layout.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -87,5 +100,25 @@ dependencies {
 
     //dependency to use NotificationCompat
     implementation(libs.androidx.core.ktx.v1150)
+
+    implementation (libs.play.services.maps.v1820)
+    implementation (libs.places)
+
+    implementation (libs.androidx.ui.v140) // Latest stable version
+    implementation (libs.androidx.foundation)
+    implementation (libs.material3)
+
+    // Jetpack Compose dependencies
+    implementation (libs.androidx.ui.v105)
+    implementation ("androidx.compose.material3:material3:1.3.1")
+    implementation (libs.ui.tooling.preview)
+    implementation (libs.androidx.foundation.v105)
+    implementation (libs.androidx.activity.compose.v131)
+
+    // Maps dependency
+    implementation (libs.play.services.maps.v1701)
+
+    //splash screen
+    implementation (libs.androidx.core.splashscreen)
 
 }

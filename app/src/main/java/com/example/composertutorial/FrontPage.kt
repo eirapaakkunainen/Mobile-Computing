@@ -74,12 +74,14 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
 
     //track dialog visibility
     var showDialog by remember { mutableStateOf(false) }
+    var showPermissionDeniedDialog by remember { mutableStateOf(false) }
+    var mapsNotInstalled = false;
 
     // request permission launcher for notifications
     val requestMultiplePermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
-            val isGranted = permissions[Manifest.permission.FOREGROUND_SERVICE_HEALTH] == true &&
+            val isGranted = permissions[Manifest.permission.POST_NOTIFICATIONS] == true &&
                             permissions[Manifest.permission.ACTIVITY_RECOGNITION] == true &&
                             permissions[Manifest.permission.BODY_SENSORS] == true &&
                             permissions[Manifest.permission.HIGH_SAMPLING_RATE_SENSORS] == true
@@ -88,7 +90,7 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
                 val serviceIntent = Intent (context, SensorService::class.java)
                 context.startService(serviceIntent)
             } else {
-
+                showPermissionDeniedDialog = true
             }
         }
     )
@@ -149,15 +151,6 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
                     userViewModel.insertUser(newUser)
                 }
 
-                /*if (user != null){
-                    if (user!!.userName != newUsername) {
-                        userViewModel.updateUser(user!!.copy(userName = newUsername))
-                    }
-                }else {
-                    val newUser = User(userName = newUsername)
-                    userViewModel.insertUser(newUser)
-                }*/
-
                 },
             label = {Text("Username")},
             singleLine = true,
@@ -198,9 +191,28 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
                 },
                 dismissButton = {
                     TextButton(
-                        onClick = { showDialog = false }
+                        onClick = {
+                            showDialog = false
+                            showPermissionDeniedDialog = true
+
+                        }
                     ) {
                         Text("Dismiss")
+                    }
+                }
+            )
+        }
+
+        if  (showPermissionDeniedDialog) {
+            AlertDialog(
+                onDismissRequest = { showPermissionDeniedDialog = false},
+                title = { Text("Permission Denied") },
+                text = { Text("You dismissed the permission request. Some features may not work properly.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = { showPermissionDeniedDialog = false }
+                    ) {
+                        Text("Close")
                     }
                 }
             )
@@ -213,6 +225,38 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
         ) {
             Text("Messages")
         }
+
+        // Button to open Google Maps
+        Button(
+            onClick = {
+                //try open Google Maps
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse("geo:65.0122,25.4682")
+                    setPackage("com.google.android.apps.maps") // This ensures it opens Google Maps
+                }
+
+                val packageManager = context.packageManager
+                val activities = packageManager.queryIntentActivities(intent, 0)
+                val isGoogleMapsInstalled = activities.any { it.activityInfo.packageName == "com.google.android.apps.maps" }
+
+                if (isGoogleMapsInstalled) {
+                    context.startActivity(intent)
+                } else {
+                    mapsNotInstalled = true
+                }
+
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp)
+        ) {
+            Text("Open Google Maps")
+        }
+
+        if (mapsNotInstalled) {
+            Text(
+                "Google Maps is not installed.",
+                modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp)
+            )
+        }
     }
 }
 
@@ -221,7 +265,7 @@ fun FrontPage(onNavigateToMessages: () -> Unit) {
 fun PreviewFrontPge() {
     ComposerTutorialTheme {
         FrontPage(
-            onNavigateToMessages = {},
+            onNavigateToMessages = {}
         )
     }
 }
